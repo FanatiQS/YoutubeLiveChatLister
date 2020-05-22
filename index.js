@@ -40,7 +40,6 @@ const videoID = process.argv[2].replace('https://www.youtube.com/watch?v=', '');
 // Gets live chat messages from stream using its video id
 request('videos?part=liveStreamingDetails&id=' + videoID, (res) => {
 	getChatItems(res.items[0].liveStreamingDetails.activeLiveChatId, (message, author) => {
-		// if (message.match(/@[\S]+/) === null) return;
 		console.log('\x1b[1m' + author + ':\x1b[0m', message + '\n');
 	});
 });
