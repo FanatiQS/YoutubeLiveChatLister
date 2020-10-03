@@ -11,7 +11,7 @@ async function makeRequest(endpoint, apiKey) {
  * @param {string} apiKey A google api key with access to youtube v3
  * @returns {Generator} A generator that returns the liveStreamChat when iterated over
  */
-async function* getChat(videoId, apiKey) {
+export default async function* getChat(videoId, apiKey) {
 	// Aborts if arguments are invalid
 	if (typeof videoId !== 'string') throw new Error("Argument 'videoId' must be a string");
 	if (typeof apiKey !== 'string') throw new Error("Argument 'apiKey' must be a string");
