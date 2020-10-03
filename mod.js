@@ -29,11 +29,13 @@ export default async function* getChat(videoId, apiKey) {
 
 	// Gets chat messages repeatedly
 	while (1) {
-		// Yields new chat messages
+		// Yields for every new chat message
 		const time = Date.now();
 		const res = await makeRequest(`liveChat/messages?part=snippet,authorDetails&liveChatId=${chatID}${page}`, apiKey);
 		page = `&pageToken=${res.nextPageToken}`;
-		yield res.items;
+		for (const item of res.items) {
+			yield item;
+		};
 
 		// Waits remaining pollinginterval before making another request
 		await new Promise((resolve) => setTimeout(resolve, res.pollingIntervalMillis - Date.now() + time));
