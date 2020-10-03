@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<pre></pre>
+		<script type="module">
+		import getChat from "./mod.js";
+		(async () => {
+			const pre = document.querySelector('pre');
+			const url = "";
+			const apikey = "";
+			for await (const item of getChat(url, apikey)) {
+				pre.innerHTML += `<b>${item.authorDetails.displayName}:</b> ${item.snippet.displayMessage}\n\n`;
+			}
+		})()
+		</script>
+	</body>
+</html>
