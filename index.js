@@ -1,45 +1,48 @@
 'use strict';
 
 const https = require('https');
-const apikey = '';
 
-// Sends a request to googles api
-function request(endpoint, callback) {
-	https.get("https://www.googleapis.com/youtube/v3/" + endpoint + '&key=' + apikey, (res) => {
-		let data = '';
-		res.on('data', (chunk) => data += chunk);
-		res.on('end', () => callback(JSON.parse(data)));
+// Makes a request to the youtube api
+async function makeRequest(endpoint, apiKey) {
+	return new Promise((resolve) => {
+		https.get(`https://www.googleapis.com/youtube/v3/${endpoint}&key=${apiKey}`, (res) => {
+			let data = '';
+			res.on('data', (chunk) => data += chunk);
+			res.on('end', () => resolve(JSON.parse(data)));
+		});
 	});
-};
-
-// Continuosly fetches new chat messages
-function getChatItems(chatID, callback) {
-	const endpoint = 'liveChat/messages?liveChatId=' + chatID + '&part=snippet,authorDetails&pageToken=';
-	request(endpoint, loop);
-
-	// Looping requests based on api specified polling interval
-	function loop(res) {
-		// Loop after interval
-		setTimeout(request, res.pollingIntervalMillis, endpoint + res.nextPageToken, loop);
-
-		// Sends messages with author to action
-		if (res.items) {
-			res.items.forEach((item) => callback(item.snippet.displayMessage, item.authorDetails.displayName));
-		}
-		else {
-			console.error(res);
-		}
-	};
 }
 
+/**
+ * @param {string} videoId The videos ID or the entire URL
+ * @param {string} apiKey A google api key with access to youtube v3
+ * @returns {Generator} A generator that returns the liveStreamChat when iterated over
+ */
+async function* getChat(videoId, apiKey) {
+	// Converts URL to videoID
+	videoId = videoId.replace('https://www.youtube.com/watch?v=', '');
 
+	// Gets liveChatId from videoId
+	const streamInfo = await makeRequest(`videos?part=liveStreamingDetails&id=${videoId}`, apiKey);
+	if (!streamInfo.items[0]) throw new Error("Unable to find livestream");
+	const chatID = streamInfo.items[0].liveStreamingDetails.activeLiveChatId;
 
-// Gets youtube video id
-const videoID = process.argv[2].replace('https://www.youtube.com/watch?v=', '');
+	// Aditional query parameter to only request new messages
+	let page = '';
 
-// Gets live chat messages from stream using its video id
-request('videos?part=liveStreamingDetails&id=' + videoID, (res) => {
-	getChatItems(res.items[0].liveStreamingDetails.activeLiveChatId, (message, author) => {
-		console.log('\x1b[1m' + author + ':\x1b[0m', message + '\n');
-	});
-});
+	// Gets chat messages repeatedly
+	while (1) {
+		// Yields for every new chat message
+		const time = Date.now();
+		const res = await makeRequest(`liveChat/messages?part=snippet,authorDetails&liveChatId=${chatID}${page}`, apiKey);
+		page = `&pageToken=${res.nextPageToken}`;
+		for (const item of res.items) {
+			yield item;
+		};
+
+		// Waits remaining pollinginterval before making another request
+		await new Promise((resolve) => setTimeout(resolve, res.pollingIntervalMillis - Date.now() + time));
+	}
+}
+
+module.exports = getChat;
