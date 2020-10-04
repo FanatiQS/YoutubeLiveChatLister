@@ -6,8 +6,8 @@
 		import getChat from "./mod.js";
 		(async () => {
 			const pre = document.querySelector('pre');
-			const url = "";
-			const apikey = "";
+			const url = prompt("What youtube live stream do you want the chat from?");
+			const apikey = prompt("Please provide your own api key");
 			for await (const item of getChat(url, apikey)) {
 				pre.innerHTML += `<b>${item.authorDetails.displayName}:</b> ${item.snippet.displayMessage}\n\n`;
 			}

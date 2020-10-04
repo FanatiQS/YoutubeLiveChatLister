@@ -12,5 +12,5 @@ Run the example file for node.js with `node example_node.js <youtube url> <api k
 Run the example file for deno with `deno run --allow-net --allow-read example_deno.js <youtube url> <api key>` and replace `<youtube url>` with a url to a youtube livestream and replace `<api key>` with your own google api key.
 
 ### Browser
-In `example_browser.html`, replace the empty string for `url` with your youtube url and apikey with your api key.
-Then set up a local http server with `python -m SimpleHTTPServer` or similar.
+Set up a local http server with `python -m SimpleHTTPServer` or similar.
+Go to the page `example_browser.html` and submit the youtube livestream url and your google api key in the pop-up boxes when prompted.
