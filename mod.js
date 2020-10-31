@@ -21,7 +21,8 @@ async function* getChat(videoId, apiKey) {
 
 	// Gets liveChatId from videoId
 	const streamInfo = await makeRequest(`videos?part=liveStreamingDetails&id=${videoId}`, apiKey);
-	if (!streamInfo.items[0]) throw new Error("Unable to find livestream");
+	if (streamInfo.error) throw new Error(streamInfo.error.message);
+	if (!streamInfo.items || !streamInfo.items[0]) throw new Error("Unable to find livestream");
 	const chatID = streamInfo.items[0].liveStreamingDetails.activeLiveChatId;
 
 	// Aditional query parameter to only request new messages
